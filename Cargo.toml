@@ -1,5 +1,5 @@
 [package]
 
-name = "reindeer-maze-rust"
+name = "reindeer-maze"
 version = "0.0.1"
 authors = ["James Deery <james.deery@jadex.org>"]
