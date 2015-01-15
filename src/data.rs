@@ -1,4 +1,5 @@
 use std::fmt;
+use std::str::FromStr;
 
 pub type Pos = (usize, usize);
 
@@ -14,6 +15,18 @@ impl Dir {
             Dir::E => (x + 1, y),
             Dir::S => (x, y - 1),
             Dir::W => (x - 1, y),
+        }
+    }
+}
+
+impl FromStr for Dir {
+    fn from_str(s: &str) -> Option<Self> {
+        match s {
+            "N" | "n" => Some(Dir::N),
+            "E" | "e" => Some(Dir::E),
+            "S" | "s" => Some(Dir::S),
+            "W" | "w" => Some(Dir::W),
+            _ => None
         }
     }
 }

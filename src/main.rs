@@ -8,16 +8,6 @@ use std::thread::Thread;
 use reindeer_maze::data::{Dir, PresentLocation};
 use reindeer_maze::maze::{Maze, MazeHandle};
 
-fn parse_msg(msg: &str) -> Option<Dir> {
-    match msg {
-        "N" | "n" => Some(Dir::N),
-        "E" | "e" => Some(Dir::E),
-        "S" | "s" => Some(Dir::S),
-        "W" | "w" => Some(Dir::W),
-        _ => None
-    }
-}
-
 fn handle_client(mut stream: TcpStream, maze: &MazeHandle) {
     let mut reader = BufferedReader::new(stream.clone());
 
@@ -36,7 +26,7 @@ fn handle_client(mut stream: TcpStream, maze: &MazeHandle) {
         let msg = line.unwrap();
         let msg = msg.trim();
 
-        let d = match parse_msg(msg) {
+        let d = match msg.parse::<Dir>() {
             None => {
                 stream.write_line("Bad command, plase try again").unwrap();
                 continue;
