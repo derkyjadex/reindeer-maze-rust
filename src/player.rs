@@ -3,12 +3,8 @@ use std::sync::mpsc::channel;
 use data::{Pos, Dir, PresentLocation, Compass};
 use maze::{MazeMsg, MazeHandle};
 
+#[derive(Clone)]
 pub struct Player {
-    pub name: String,
-    pub pos: Pos,
-}
-
-pub struct PlayerInfo {
     pub name: String,
     pub pos: Pos,
 }

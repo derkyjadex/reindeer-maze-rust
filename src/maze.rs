@@ -6,7 +6,7 @@ use std::iter::{repeat};
 use std::rand::random;
 
 use data::{Pos, Dir};
-use player::{PlayerInfo, Player, PlayerHandle};
+use player::{Player, PlayerHandle};
 
 pub struct MazeInfo {
     pub width: usize,
@@ -29,7 +29,7 @@ pub enum MazeMsg {
     AddPlayer(String, Pos, Sender<(u64, Pos)>),
     RemovePlayer(u64),
     MovePlayer(u64, Pos, Sender<()>),
-    GetPlayers(Sender<Vec<PlayerInfo>>),
+    GetPlayers(Sender<Vec<Player>>),
 }
 
 impl<'a> MazeHandle<'a> {
@@ -113,10 +113,7 @@ fn processor(receiver: Receiver<MazeMsg>) {
             MazeMsg::GetPlayers(sender) => {
                 sender.send(players.iter()
                     .map(|(_, player)| {
-                        PlayerInfo {
-                            name: player.name.clone(),
-                            pos: player.pos,
-                        }
+                        player.clone()
                     })
                     .collect())
                     .unwrap();
