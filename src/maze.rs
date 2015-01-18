@@ -15,14 +15,10 @@ pub struct MazeInfo {
     pub present: Pos,
 }
 
+#[derive(Clone)]
 pub struct Maze {
     pub info: Arc<MazeInfo>,
     pub sender: Sender<MazeMsg>,
-}
-
-pub struct MazeHandle<'a> {
-    pub sender: &'a Sender<MazeMsg>,
-    pub info: &'a MazeInfo,
 }
 
 pub enum MazeMsg {
@@ -32,8 +28,30 @@ pub enum MazeMsg {
     GetPlayers(Sender<Vec<Player>>),
 }
 
-impl<'a> MazeHandle<'a> {
-    pub fn add_player(&'a self, name: &str) -> Option<PlayerHandle<'a>> {
+impl Maze {
+    pub fn new(width: usize, height: usize) -> Maze {
+        let present = (width / 2, height / 2);
+
+        let (sender, receiver) = channel();
+
+        let info = Arc::new(MazeInfo {
+            width: width,
+            height: height,
+            walls: generate_maze(width, height, present),
+            present: present,
+        });
+
+        let maze = Maze {
+            info: info.clone(),
+            sender: sender,
+        };
+
+        Thread::spawn(move || processor(receiver));
+
+        maze
+    }
+
+    pub fn add_player<'a>(&'a self, name: &str) -> Option<PlayerHandle<'a>> {
         let pos = (random::<usize>() % self.info.width, random::<usize>() % self.info.height);
         println!("Adding player at {:?}", pos);
 
@@ -41,7 +59,11 @@ impl<'a> MazeHandle<'a> {
         let msg = MazeMsg::AddPlayer(name.to_string(), pos, result_sender);
         self.sender.send(msg).unwrap();
 
-        receiver.recv().ok().map(|(id, pos)| PlayerHandle { id: id, maze: self, pos: pos })
+        receiver.recv().ok().map(|(id, pos)| PlayerHandle {
+            id: id,
+            maze: self,
+            pos: pos,
+        })
     }
 
     pub fn is_valid_location(&self, (x, y): Pos) -> bool {
@@ -58,30 +80,6 @@ impl<'a> MazeHandle<'a> {
 
             c += 1;
         }
-    }
-}
-
-impl Maze {
-    pub fn new(width: usize, height: usize) -> Arc<Maze> {
-        let present = (width / 2, height / 2);
-
-        let (sender, receiver) = channel();
-
-        let info = Arc::new(MazeInfo {
-            width: width,
-            height: height,
-            walls: generate_maze(width, height, present),
-            present: present,
-        });
-
-        let maze = Arc::new(Maze {
-            info: info.clone(),
-            sender: sender,
-        });
-
-        Thread::spawn(move || processor(receiver));
-
-        maze
     }
 }
 

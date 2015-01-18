@@ -1,7 +1,7 @@
 use std::sync::mpsc::channel;
 
 use data::{Pos, Dir, PresentLocation, Compass};
-use maze::{MazeMsg, MazeHandle};
+use maze::{MazeMsg, Maze};
 
 #[derive(Clone)]
 pub struct Player {
@@ -11,7 +11,7 @@ pub struct Player {
 
 pub struct PlayerHandle<'a> {
     pub id: u64,
-    pub maze: &'a MazeHandle<'a>,
+    pub maze: &'a Maze,
     pub pos: Pos,
 }
 

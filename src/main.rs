@@ -6,16 +6,16 @@ use std::io::{TcpListener, TcpStream, Acceptor, Listener, BufferedReader};
 use std::thread::Thread;
 
 use reindeer_maze::data::{Dir, PresentLocation};
-use reindeer_maze::maze::{Maze, MazeHandle};
+use reindeer_maze::maze::{Maze};
 
-fn handle_client(mut stream: TcpStream, maze: &MazeHandle) {
+fn handle_client(mut stream: TcpStream, maze: Maze) {
     let mut reader = BufferedReader::new(stream.clone());
 
     stream.write_line("Welcome to the reindeer maze! What is your team name?").unwrap();
     let name = reader.read_line().unwrap();
     let name = name.trim();
 
-    let player = &mut maze.add_player(name).unwrap();
+    let mut player = maze.add_player(name).unwrap();
 
     println!("{} joined", name);
 
@@ -65,12 +65,9 @@ fn main() {
     for stream in acceptor.incoming() {
         match stream {
             Ok(stream) => {
-                let sender = maze.sender.clone();
-                let info = maze.info.clone();
+                let maze = maze.clone();
                 Thread::spawn(move || {
-                    let handle = &MazeHandle { sender: &sender, info: &*info };
-
-                    handle_client(stream, handle)
+                    handle_client(stream, maze)
                 });
             },
             Err(e) => {
